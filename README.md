@@ -1,5 +1,21 @@
 # Maatify SharedCommon
 
+[![Latest Version](https://img.shields.io/packagist/v/maatify/shared-common.svg?style=for-the-badge)](https://packagist.org/packages/maatify/shared-common)
+[![PHP Version](https://img.shields.io/packagist/php-v/maatify/shared-common.svg?style=for-the-badge)](https://packagist.org/packages/maatify/shared-common)
+[![License](https://img.shields.io/packagist/l/maatify/shared-common.svg?style=for-the-badge)](LICENSE)
+
+![PHPStan](https://img.shields.io/badge/PHPStan-Level%20Max-4E8CAE)
+
+[![Changelog](https://img.shields.io/badge/Changelog-View-blue)](CHANGELOG.md)
+[![Security](https://img.shields.io/badge/Security-Policy-important)](SECURITY.md)
+
+![Monthly Downloads](https://img.shields.io/packagist/dm/maatify/shared-common?label=Monthly%20Downloads&color=00A8E8)
+![Total Downloads](https://img.shields.io/packagist/dt/maatify/shared-common?label=Total%20Downloads&color=2AA9E0)
+
+![Maatify Ecosystem](https://img.shields.io/badge/Maatify-Ecosystem-blueviolet?style=for-the-badge)
+
+[![Install](https://img.shields.io/badge/Install-composer%20require-blue?style=for-the-badge)](https://packagist.org/packages/maatify/shared-common)
+
 ## Overview
 
 The `Maatify\SharedCommon` module contains foundational contracts and abstractions that are intended to be shared across all Maatify modules (such as `AdminKernel`, `Verification`, etc.). Its primary goal is to provide unified interfaces for common cross-cutting concerns like time management, security contexts, and telemetry, enabling consistent behavior and testing across the entire system.
