@@ -6,6 +6,20 @@ The format is based on **Keep a Changelog** and this project follows **Semantic 
 
 ---
 
+## [1.0.1] - 2026-04-11
+
+### Added
+
+- **Application Paths Utility:** Introduced `AppPaths` in the `Maatify\SharedCommon\Path` namespace as a dedicated utility for resolving commonly used project paths, including root, public, public images, storage, config, and logs.
+
+- **Nested Storage Path Resolver:** Added `storagePath(string $subfolder)` to support consistent and reusable generation of subpaths within the storage directory.
+
+### Changed
+
+- **Path Access Consistency:** Standardized path resolution behind a dedicated utility class to provide clearer and more reusable access to common application directories.
+
+---
+
 ## [1.0.0] - 2026-03-11
 
 ### Added
