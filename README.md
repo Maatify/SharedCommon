@@ -18,7 +18,7 @@
 
 ## Overview
 
-The `Maatify\SharedCommon` module contains foundational contracts and abstractions that are intended to be shared across all Maatify modules (such as `AdminKernel`, `Verification`, etc.). Its primary goal is to provide unified interfaces for common cross-cutting concerns like time management, security contexts, and telemetry, enabling consistent behavior and testing across the entire system.
+The `Maatify\SharedCommon` module contains foundational contracts and abstractions that are intended to be shared across all Maatify modules (such as `AdminKernel`, `Verification`, etc.). Its primary goal is to provide unified interfaces for common cross-cutting concerns like time management, security contexts, permission mapping definitions, and telemetry, enabling consistent behavior and testing across the entire system.
 
 ## Purpose
 
@@ -26,16 +26,22 @@ By depending on `SharedCommon` rather than framework-specific implementations or
 
 ## Module Structure
 
-```
+```md
 Modules/SharedCommon/
 ├── Bootstrap/                 # Dependency Injection bindings
 │   └── SharedCommonBindings.php
-├── Contracts/                 # Core interfaces for time, telemetry, and security
+├── Contracts/                 # Core interfaces for time, telemetry, security, and shared module extensions
 │   ├── ClockInterface.php
+│   ├── Security/              # Framework-neutral security extension contracts
+│   │   ├── PermissionMapProviderInterface.php
+│   │   ├── PermissionRequirementDefinition.php
+│   │   └── ProvidesPermissionMapsInterface.php
 │   ├── SecurityEventContextInterface.php
 │   └── TelemetryContextInterface.php
 ├── Infrastructure/            # Default implementations of contracts
 │   └── SystemClock.php
+├── Path/                      # Common application path resolution utilities
+│   └── AppPaths.php
 ├── docs/                      # Architectural and integration documentation
 └── composer.json              # Standalone package metadata
 ```
@@ -64,6 +70,115 @@ $clock = $container->get(ClockInterface::class);
 $now = $clock->now();
 echo $now->format('Y-m-d H:i:s');
 ```
+
+---
+
+## Permission Mapping Contracts
+
+`SharedCommon` provides framework-neutral permission mapping contracts under:
+
+```php
+Maatify\SharedCommon\Contracts\Security
+```
+
+These contracts allow independent Maatify modules to expose route-to-permission requirements without depending on `AdminKernel` or any application-specific security implementation.
+
+This keeps modules reusable and decoupled while allowing the application or kernel layer to aggregate permission maps and convert them into its own authorization model.
+
+### Defining Permission Requirements
+
+Use `PermissionRequirementDefinition` to describe the permission requirement for a route.
+
+```php
+use Maatify\SharedCommon\Contracts\Security\PermissionRequirementDefinition;
+
+$single = PermissionRequirementDefinition::single('payment_methods.list');
+
+$anyOf = PermissionRequirementDefinition::anyOf([
+    'payment_methods.list',
+    'payment_methods.dropdown',
+]);
+
+$allOf = PermissionRequirementDefinition::allOf([
+    'payment_methods.update',
+    'payment_methods.translations.upsert',
+]);
+
+$compound = PermissionRequirementDefinition::compound(
+    anyOf: ['payment_methods.list', 'payment_methods.dropdown'],
+    allOf: ['admin.access'],
+);
+```
+
+### Providing a Permission Map from a Module
+
+A module can expose its route permission map by implementing `PermissionMapProviderInterface`.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Maatify\PaymentMethod\Security;
+
+use Maatify\SharedCommon\Contracts\Security\PermissionMapProviderInterface;
+use Maatify\SharedCommon\Contracts\Security\PermissionRequirementDefinition;
+
+final class PaymentMethodPermissionMapProvider implements PermissionMapProviderInterface
+{
+    /**
+     * @return array<string, PermissionRequirementDefinition>
+     */
+    public function permissionMap(): array
+    {
+        return [
+            'payment_methods.list.ui' => PermissionRequirementDefinition::single('payment_methods.list'),
+            'payment_methods.list.api' => PermissionRequirementDefinition::single('payment_methods.list'),
+
+            'payment_methods.dropdown.api' => PermissionRequirementDefinition::anyOf([
+                'payment_methods.list',
+                'payment_methods.dropdown',
+            ]),
+
+            'payment_methods.create.api' => PermissionRequirementDefinition::single('payment_methods.create'),
+            'payment_methods.update.api' => PermissionRequirementDefinition::single('payment_methods.update'),
+        ];
+    }
+}
+```
+
+### Exposing Permission Map Providers from a Package
+
+A package or module-level entry point may implement `ProvidesPermissionMapsInterface` to expose one or more permission map providers.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Maatify\PaymentMethod;
+
+use Maatify\PaymentMethod\Security\PaymentMethodPermissionMapProvider;
+use Maatify\SharedCommon\Contracts\Security\PermissionMapProviderInterface;
+use Maatify\SharedCommon\Contracts\Security\ProvidesPermissionMapsInterface;
+
+final class PaymentMethodPackage implements ProvidesPermissionMapsInterface
+{
+    /**
+     * @return list<PermissionMapProviderInterface>
+     */
+    public function permissionMapProviders(): array
+    {
+        return [
+            new PaymentMethodPermissionMapProvider(),
+        ];
+    }
+}
+```
+
+The consuming application or kernel layer is responsible for collecting these providers and converting the neutral definitions into its own authorization objects.
+
+---
 
 ## Further Documentation
 

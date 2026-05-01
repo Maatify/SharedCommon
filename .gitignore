@@ -35,3 +35,7 @@ Thumbs.db
 /var/cache/
 
 composer.lock
+/.idea/
+/storage/
+/internals/
+*.patch

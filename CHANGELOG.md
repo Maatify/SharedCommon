@@ -6,6 +6,28 @@ The format is based on **Keep a Changelog** and this project follows **Semantic 
 
 ---
 
+## [1.0.2] - 2026-05-01
+
+### Added
+
+- **Permission Mapping Contracts:** Added neutral permission mapping contracts under `Maatify\SharedCommon\Contracts\Security` to allow independent modules to expose their route-to-permission requirements without depending on `AdminKernel`.
+
+- **Permission Requirement Definition Value Object:** Introduced `PermissionRequirementDefinition` as a framework-neutral value object for defining permission requirements using:
+  - single permission
+  - `anyOf` permission groups
+  - `allOf` permission groups
+  - compound `anyOf` + `allOf` requirements
+
+- **Permission Map Provider Contract:** Added `PermissionMapProviderInterface` to let modules provide permission maps in a consistent and type-safe way.
+
+- **Module Permission Provider Discovery Contract:** Added `ProvidesPermissionMapsInterface` to allow module/package-level classes to expose one or more permission map providers.
+
+### Changed
+
+- **Permission Mapping Extensibility:** Established `SharedCommon` as the only allowed shared dependency point for module-level permission definitions, keeping modules independent from `AdminKernel` while allowing the kernel/application layer to aggregate permission maps safely.
+
+---
+
 ## [1.0.1] - 2026-04-11
 
 ### Added
